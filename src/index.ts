@@ -1,6 +1,6 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import pool from '../db/index.js'
+import pool from '../src/db/index.js'
 
 const app = new Hono()
 
@@ -9,6 +9,7 @@ app.get('/', (c) => {
 })
 
 app.get('/health', async (c) => {
+  // at the health endpoint we're querying the pool to see if the db is connected
   try {
     const query = await pool.query("SELECT 1")
     return c.json({ status: "ok" }, 200)
