@@ -10,13 +10,10 @@ export async function generateApiKey(userId: string, name?: string): Promise<str
   const raw_api_key: string = buf.toString('hex')
   const prefix: string = "sk_" + raw_api_key.substring(0, 10)
 
-
   // generate hashed api key
   const hash = createHash('sha256')
   hash.update(raw_api_key)
   const api_key_hash = hash.digest('hex')
-
-  console.log(api_key_hash)
 
   try {
     await createApiKey(userId, api_key_hash, prefix, name)

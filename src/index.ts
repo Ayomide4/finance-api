@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import pool from '../src/db/index.js'
 import { api_keys } from './api_keys/route.js'
+import { users } from './users/route.js'
 
 const app = new Hono()
 
@@ -21,6 +22,7 @@ app.get('/health', async (c) => {
 })
 
 app.route('/api_key', api_keys)
+app.route('/users', users)
 
 serve({
   fetch: app.fetch,
