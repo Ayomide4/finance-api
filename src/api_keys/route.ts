@@ -1,11 +1,18 @@
 import { Hono } from "hono"
 import { generateApiKey } from "./service.js"
+import { authMiddleware } from "../middleware/auth.js"
 
 export const api_keys = new Hono()
 
-api_keys.post("/", async (c) => {
+// TODO: 
+// - delete api key route
+// - update api key name route?
+
+api_keys.post("/", authMiddleware, async (c) => {
   try {
-    const { user_id, name } = await c.req.json()
+    const user_id = c.get('userId')
+    const body = await c.req.json().catch(() => ({}))
+    const { name } = body
     const rawKey = await generateApiKey(user_id, name)
     return c.json({ apiKey: rawKey }, 201)
   }

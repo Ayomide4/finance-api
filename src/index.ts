@@ -3,8 +3,10 @@ import { Hono } from 'hono'
 import pool from '../src/db/index.js'
 import { api_keys } from './api_keys/route.js'
 import { users } from './users/route.js'
+import { authMiddleware } from './middleware/auth.js'
 
 const app = new Hono()
+const v1 = new Hono()
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
@@ -21,8 +23,9 @@ app.get('/health', async (c) => {
   }
 })
 
-app.route('/api_key', api_keys)
-app.route('/users', users)
+v1.route('/api-keys', api_keys)
+v1.route('/users', users)
+app.route('/v1', v1)
 
 serve({
   fetch: app.fetch,

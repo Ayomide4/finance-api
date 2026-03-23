@@ -1,5 +1,7 @@
 import { saveUser } from "./repository.js";
 import { isValidEmail } from "../utils.js";
+import { generateApiKey } from "../api_keys/service.js";
+import type { User } from "../types.js";
 
 
 export async function createUser(email: string) {
@@ -13,7 +15,11 @@ export async function createUser(email: string) {
 
   try {
     const res = await saveUser(email)
-    return res
+    const apiKey: string = await generateApiKey(res.id)
+    const userObj: User = { ...res, api_key: apiKey }
+
+    return userObj
+
   } catch (err) {
     console.error("Error saving user to db", err)
     throw new Error("Could not create user. Please try again later")
