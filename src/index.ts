@@ -6,6 +6,7 @@ import { users } from './users/route.js'
 import { authMiddleware } from './middleware/auth.js'
 import { except } from 'hono/combine'
 import type { Variables } from './types.js'
+import { accounts } from './accounts/routes.js'
 
 const app = new Hono()
 const v1 = new Hono<{ Variables: Variables }>()
@@ -27,6 +28,7 @@ app.get('/health', async (c) => {
 
 v1.route('/api-keys', api_keys)
 v1.route('/users', users)
+v1.route('/accounts', accounts)
 v1.use('*', except(['/users']), authMiddleware)
 
 app.route('/v1', v1)
