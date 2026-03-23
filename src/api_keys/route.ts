@@ -1,14 +1,15 @@
 import { Hono } from "hono"
 import { generateApiKey } from "./service.js"
 import { authMiddleware } from "../middleware/auth.js"
+import type { Variables } from "../types.js"
 
-export const api_keys = new Hono()
+export const api_keys = new Hono<{ Variables: Variables }>()
 
 // TODO: 
 // - delete api key route
 // - update api key name route?
 
-api_keys.post("/", authMiddleware, async (c) => {
+api_keys.post("/", async (c) => {
   try {
     const user_id = c.get('userId')
     const body = await c.req.json().catch(() => ({}))

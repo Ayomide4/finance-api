@@ -8,7 +8,7 @@ export async function generateApiKey(userId: string, name?: string): Promise<str
   // generate raw api key + create prefix
   const buf: Buffer = randomBytes(32)
   const raw_api_key: string = buf.toString('hex')
-  const prefix: string = "sk_" + raw_api_key.substring(0, 10)
+  const prefix: string = "sk_" + raw_api_key.substring(0, 9)
 
   // generate hashed api key
   const hash = createHash('sha256')

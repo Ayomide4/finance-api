@@ -15,8 +15,9 @@ export async function createUser(email: string) {
 
   try {
     const res = await saveUser(email)
+    console.log('USER ID: ', res.id)
     const apiKey: string = await generateApiKey(res.id)
-    const userObj: User = { ...res, api_key: apiKey }
+    const userObj: User = { ...res, apiKey: apiKey }
 
     return userObj
 

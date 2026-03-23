@@ -3,3 +3,9 @@ export interface User {
   email: string;
   apiKey: string;
 }
+
+export type Variables = {
+  userId: string
+}
+
+
