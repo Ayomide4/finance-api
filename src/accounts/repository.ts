@@ -8,3 +8,28 @@ export async function saveAccount(userId: string, accountName: string, accountTy
 
   return { ...account, balance: 0 } as AccountWithBalance
 }
+
+export async function listAccountsByUser(userId: string, limit: number, offset: number) {
+  const result = await pool.query("SELECT * FROM accounts WHERE user_id = $1 LIMIT $2 OFFSET $3", [userId, limit, offset])
+  const accounts = result.rows
+
+  const accountsWithBalance = accounts.map((account: Account) => ({
+    ...account,
+    balance: 0
+  }))
+
+  return accountsWithBalance
+}
+
+
+export async function changeAccountName(userId: string, accountName: string, accountId: string) {
+  const result = await pool.query("UPDATE accounts SET account_name = $1 WHERE id = $2 AND user_id = $3 RETURNING *", [accountName, accountId, userId])
+  return result.rows[0]
+}
+
+export async function deleteAccountById(userId: string, accountId: string): Promise<Account> {
+  const account_status = 'closed'
+  const res = await pool.query('UPDATE accounts SET account_status = $1 WHERE id = $2 AND user_id = $3 RETURNING *', [account_status, accountId, userId])
+
+  return res.rows[0]
+}

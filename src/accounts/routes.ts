@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Variables } from "../types.js";
-import { createAccount } from "./service.js";
+import { createAccount, deleteAccount, listAccountsWithBalance, updateAccountName } from "./service.js";
 
 
 export const accounts = new Hono<{ Variables: Variables }>()
@@ -15,7 +15,50 @@ accounts.post("/", async (c) => {
 
   } catch (err) {
     console.error("Error creating account", err)
-    return c.json("Failed to create account", 400)
+    return c.json({ error: "Failed to create account" }, 400)
 
   }
 })
+
+accounts.patch("/:id", async (c) => {
+  try {
+    const userId = c.get("userId")
+    const accountId = c.req.param('id')
+    const { accountName } = await c.req.json()
+
+    const account = await updateAccountName(userId, accountName, accountId)
+    return c.json(account, 200)
+  } catch (err) {
+    console.error("Error updating account", err)
+    return c.json({ error: "Failed to update account" }, 400)
+  }
+})
+
+accounts.get("/", async (c) => {
+  try {
+    const { limit, offset } = c.req.query()
+    const limitNum = Math.min(Number(limit) || 20, 100)
+    const offsetNum = Number(offset) || 0
+
+    const userId = c.get("userId")
+    const accounts = await listAccountsWithBalance(userId, limitNum, offsetNum)
+    return c.json(accounts, 200)
+  } catch (err) {
+    console.error("Error getting user accounts", err)
+    return c.json({ error: "Failed to get user accounts" }, 400)
+  }
+})
+
+accounts.delete('/:id', async (c) => {
+  try {
+    const userId = c.get("userId")
+    const accountId = c.req.param('id')
+
+    const res = await deleteAccount(userId, accountId)
+    c.json(res, 200)
+  } catch (err) {
+    console.error("Error deleting account", err)
+    return c.json({ error: "Failed to delete account" }, 400)
+  }
+})
+
