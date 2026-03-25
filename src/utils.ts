@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 
 
 export function isValidEmail(email: string): boolean {
@@ -5,3 +6,9 @@ export function isValidEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
+
+export function createHashFromRaw(rawApiKey: string): string {
+  const hash = createHash('sha256')
+  hash.update(rawApiKey)
+  return hash.digest('hex')
+}

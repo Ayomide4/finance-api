@@ -4,7 +4,7 @@ import { generateApiKey } from "../api_keys/service.js";
 import type { User } from "../types.js";
 
 
-export async function createUser(email: string) {
+export async function createUser(email: string): Promise<User> {
   if (!email) {
     throw new Error("user email is required")
   }
@@ -17,7 +17,7 @@ export async function createUser(email: string) {
     const res = await saveUser(email)
     console.log('USER ID: ', res.id)
     const apiKey: string = await generateApiKey(res.id)
-    const userObj: User = { ...res, apiKey: apiKey }
+    const userObj: User = { ...res, api_key: apiKey }
 
     return userObj
 

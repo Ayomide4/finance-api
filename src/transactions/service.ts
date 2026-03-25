@@ -1,4 +1,4 @@
-import type { TransactionType } from "../types.js";
+import type { Transaction, TransactionType } from "../types.js";
 import { saveTransaction } from "./repository.js";
 
 export async function createTransaction(
@@ -6,7 +6,7 @@ export async function createTransaction(
   accountId: string,
   categoryId: string,
   amount: number,
-  type: TransactionType) {
+  type: TransactionType): Promise<Transaction> {
 
   if (!userId) {
     throw new Error("User id is required")

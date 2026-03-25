@@ -1,11 +1,24 @@
 export interface User {
   id: string;
   email: string;
-  apiKey: string;
+  api_key: string;
+}
+
+export interface ApiKey {
+  id: string;
+  user_id: string;
+  name: string | null;
+  prefix: string;
+  hash: string;
+  revoked_at: string | Date | null;
+  expires_at: string | Date | null;
+  last_used_at: string | Date | null;
+  created_at?: string | Date;
 }
 
 export type Variables = {
-  userId: string
+  userId: string;
+  rawApiKey: string;
 }
 
 export type AccountType = "savings" | "checking" | "investment"

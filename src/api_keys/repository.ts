@@ -13,3 +13,8 @@ export async function findApiKeyByHash(hash: string): Promise<string | null> {
   return result.rows[0].user_id;
 }
 
+export async function revokeApiKeyByHash(hash: string, userId: string) {
+  const res = await pool.query("UPDATE api_keys SET revoked_at = NOW() WHERE hash = $1 AND user_id $2 RETURNING *", [hash, userId])
+
+  return res.rows[0]
+}

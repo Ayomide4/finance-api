@@ -1,7 +1,11 @@
-import { randomBytes, createHash } from "crypto";
-import { createApiKey } from "./repository.js";
+import { randomBytes } from "node:crypto";
+import { createApiKey, revokeApiKeyByHash } from "./repository.js";
+import { createHashFromRaw } from "../utils.js";
 
 export async function generateApiKey(userId: string, name?: string): Promise<string> {
+  if (!userId) {
+    throw new Error("User id is required")
+  }
 
   // generate raw api key + create prefix
   const buf: Buffer = randomBytes(32)
@@ -9,9 +13,7 @@ export async function generateApiKey(userId: string, name?: string): Promise<str
   const prefix: string = "sk_" + raw_api_key.substring(0, 9)
 
   // generate hashed api key
-  const hash = createHash('sha256')
-  hash.update(raw_api_key)
-  const api_key_hash = hash.digest('hex')
+  const api_key_hash = createHashFromRaw(raw_api_key)
 
   try {
     await createApiKey(userId, api_key_hash, prefix, name)
@@ -21,4 +23,26 @@ export async function generateApiKey(userId: string, name?: string): Promise<str
     throw new Error("Could not generate API key. Please try again later")
   }
 }
+
+export async function revokeApiKey(rawApiKey: string, userId: string) {
+  if (!userId) throw new Error("User id is required");
+  if (!rawApiKey) throw new Error("Api key is required");
+
+  const hash = createHashFromRaw(rawApiKey);
+  let res;
+
+  try {
+    res = await revokeApiKeyByHash(hash, userId);
+  } catch (err) {
+    console.error("Database error during revocation", err);
+    throw new Error("Internal server error");
+  }
+
+  if (!res) {
+    throw new Error("API key not found or already revoked");
+  }
+
+  return res;
+}
+
 

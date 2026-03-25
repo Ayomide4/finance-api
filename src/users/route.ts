@@ -1,7 +1,8 @@
 import { Hono } from "hono"
 import { createUser } from "./service.js"
+import type { Variables } from "../types.js"
 
-export const users = new Hono()
+export const users = new Hono<{ Variables: Variables }>()
 
 
 // TODO: 
@@ -12,7 +13,7 @@ users.post('/', async (c) => {
     const { email } = await c.req.json()
     const response = await createUser(email)
 
-    const user = { id: response.id, email: email, apiKey: response.apiKey }
+    const user = { id: response.id, email: email, apiKey: response.api_key }
     console.log(response)
 
     return c.json(user, 201)
@@ -21,3 +22,5 @@ users.post('/', async (c) => {
     return c.json({ error: "There was an error creating the user" }, 400)
   }
 })
+
+

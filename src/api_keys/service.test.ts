@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { generateApiKey } from "./service.js"
-import { createApiKey } from "./repository.js"
-
-
-// todo: prefix, raw key, if usedId exists, 
+import { generateApiKey, revokeApiKey } from "./service.js"
+import { createApiKey, revokeApiKeyByHash } from "./repository.js"
 
 vi.mock('./repository.js', () => ({
-  createApiKey: vi.fn().mockResolvedValue({ id: "some-user-id" })
+  createApiKey: vi.fn().mockResolvedValue({ id: "some-user-id" }),
+  revokeApiKeyByHash: vi.fn().mockResolvedValue({
+    id: "some-id",
+    user_id: "some-user-id",
+    name: "some-name",
+    prefix: "some-prefix",
+    hash: "some-hash",
+    revoked_at: "some-timestamp",
+    expires_at: "some-timestamp",
+  })
 }))
 
 describe('generateApiKey', () => {
@@ -26,7 +32,41 @@ describe('generateApiKey', () => {
   })
 
   it('return error if no user id', async () => {
-    await expect(generateApiKey('')).rejects.toThrow('user id is required')
+    await expect(generateApiKey('')).rejects.toThrow('User id is required')
+  })
+})
+
+describe("revokeApiKey", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
   })
 
+  it('return error if no user id', async () => {
+    await expect(revokeApiKey('some-api-key', "")).rejects.toThrow('User id is required')
+  })
+
+  it('return error if no raw api key', async () => {
+    await expect(revokeApiKey('', "some-user-id")).rejects.toThrow('Api key is required')
+  })
+
+  it("return API Key obj on success", async () => {
+    const res = await revokeApiKey("some-api-key", "some-user-id")
+    expect(res).toEqual({
+      id: "some-id",
+      user_id: "some-user-id",
+      name: "some-name",
+      prefix: "some-prefix",
+      hash: "some-hash",
+      revoked_at: "some-timestamp",
+      expires_at: "some-timestamp",
+    })
+  })
+
+  it("should throw a failed to find api key if hash does not exist", async () => {
+    vi.mocked(revokeApiKeyByHash).mockResolvedValue(undefined)
+
+    await expect(revokeApiKey("some-api-key", "some-user-id"))
+      .rejects
+      .toThrow("API key not found or already revoked")
+  })
 })

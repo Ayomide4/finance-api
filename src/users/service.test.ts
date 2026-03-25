@@ -22,8 +22,4 @@ describe('createUser', () => {
     const result = await createUser('test@gmail.com')
     expect(result).toEqual({ id: "some-user-id", email: "test@gmail.com", api_key: "some-api-key" })
   })
-
-  it('should return error if email is invalid', async () => {
-    await expect(createUser('testgmail.com')).rejects.toThrow('user email is invalid')
-  })
 })

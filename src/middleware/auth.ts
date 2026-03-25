@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { createMiddleware } from "hono/factory";
 import { findApiKeyByHash } from "../api_keys/repository.js";
+import type { Variables } from "../types.js";
 
 
-export const authMiddleware = createMiddleware<{ Variables: { userId: string } }>(async (c, next) => {
+export const authMiddleware = createMiddleware<{ Variables: Variables }>(async (c, next) => {
   const authToken = c.req.header('Authorization')
 
   if (!authToken) {
@@ -30,6 +31,7 @@ export const authMiddleware = createMiddleware<{ Variables: { userId: string } }
     }
 
     c.set('userId', userId) //set userId in context so it can be used elsewhere
+    c.set('rawApiKey', rawApiKey)
 
   } catch (err) {
     return c.json({ error: 'Internal Server Error' }, 500)
