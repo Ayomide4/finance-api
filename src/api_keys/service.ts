@@ -2,9 +2,7 @@ import { randomBytes, createHash } from "crypto";
 import { createApiKey } from "./repository.js";
 
 export async function generateApiKey(userId: string, name?: string): Promise<string> {
-  if (!userId) {
-    throw new Error('user id is required')
-  }
+
   // generate raw api key + create prefix
   const buf: Buffer = randomBytes(32)
   const raw_api_key: string = buf.toString('hex')

@@ -26,3 +26,21 @@ export interface Account {
 export type AccountWithBalance = Account & {
   balance: number
 }
+
+export interface Category {
+  id: string;
+  user_id: string;
+  name: string;
+  color: string;
+}
+
+export type TransactionType = "credit" | "debit"
+
+export interface Transaction {
+  id: string;
+  account_id: string;
+  category_id: string;
+  amount: number;
+  type: TransactionType
+
+}

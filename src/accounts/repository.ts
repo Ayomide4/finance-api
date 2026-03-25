@@ -1,4 +1,4 @@
-import pool from "../db/index.js";
+import { pool } from "../db/index.js";
 import type { Account, AccountType, AccountWithBalance } from "../types.js";
 
 
