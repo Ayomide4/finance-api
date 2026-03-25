@@ -26,3 +26,7 @@ export async function createUser(email: string): Promise<User> {
     throw new Error("Could not create user. Please try again later")
   }
 }
+
+export async function listAccounts(userId: string, limit: number, offset: number) { }
+
+export async function getAccount() { }

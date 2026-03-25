@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Variables } from "../types.js";
-import { createAccount, deleteAccount, listAccountsWithBalance, updateAccountName } from "./service.js";
+import { createAccount, deleteAccount, getAccount, listAccountsWithBalance, updateAccountName } from "./service.js";
 
 
 export const accounts = new Hono<{ Variables: Variables }>()
@@ -17,6 +17,24 @@ accounts.post("/", async (c) => {
     console.error("Error creating account", err)
     return c.json({ error: "Failed to create account" }, 400)
 
+  }
+})
+
+accounts.get("/:id", async (c) => {
+  try {
+    const userId = c.get("userId")
+    const accountId = c.req.param("id")
+
+    const res = await getAccount(userId, accountId)
+    return c.json(res, 200)
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+    if (errorMessage === "failed to find account") {
+      return c.json({ error: "Account not found" }, 404)
+    }
+    console.error("Failed to find account")
+    return c.json({ error: "Failed to serach for account" },)
   }
 })
 
