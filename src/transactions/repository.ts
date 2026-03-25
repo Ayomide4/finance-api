@@ -15,19 +15,33 @@ export async function saveTransaction(
 
   try {
     await client.query("BEGIN")
-    const res = await client.query("INSERT INTO transactions (userId, accountId, categoryId, amount, type) VALUE ($1, $2, $3, $4, $5) RETURNING *", [userId, accountId, categoryId, amount, type])
+
+    const queryText = `
+      INSERT INTO transactions (userId, accountId, categoryId, amount, type) 
+      VALUES ($1, $2, $3, $4, $5) 
+      RETURNING *
+    `;
+
+    const res = await client.query(queryText, [userId, accountId, categoryId, amount, type]);
+
     // await client.query("INSERT INTO audit_log")
+
     await client.query("COMMIT")
     return res.rows[0]
   } catch (err) {
-    await client.query("ROLLBACK")
+    try {
+      await client.query("ROLLBACK")
+    } catch (err) {
+      console.error("Rollback failed:", err)
+    }
+    throw (err)
   } finally {
     client.release()
   }
 }
 
 
-export async function reverseTransactionById(userId: string, transactionId: string) {
-
-}
+// export async function reverseTransactionById(userId: string, transactionId: string) {
+//
+// }
 

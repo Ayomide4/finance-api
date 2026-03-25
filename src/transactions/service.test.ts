@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createTransaction } from "./service.js"
 
-vi.mock('/repository.js', () => ({
+vi.mock('./repository.js', () => ({
   saveTransaction: vi.fn().mockResolvedValue({
     user_id: "some-user-id",
     account_id: "some-account-id",
@@ -10,9 +10,6 @@ vi.mock('/repository.js', () => ({
     type: "some-transaction-type"
   })
 }))
-
-// return the correct obj
-//
 
 describe("createTransaction", () => {
   beforeEach(() => {
@@ -30,4 +27,7 @@ describe("createTransaction", () => {
     })
   })
 
+  it("should throw error if no userId", async () => {
+    await expect(createTransaction("", 'some-account-id', 'some-category-id', 0, 'credit')).rejects.toThrow("User id is required")
+  })
 })
