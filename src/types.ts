@@ -27,7 +27,6 @@ export type AccountStatus = "active" | "frozen" | "closed"
 
 export type CurrencyCode = "USD" | "EUR" | "GBP" | "CAD" | "JPY";
 
-export type AuditActionType = "created" | "updated" | "reversed" | "deactivated"
 
 export interface Account {
   id: string;
@@ -57,5 +56,32 @@ export interface Transaction {
   category_id: string;
   amount: number;
   type: TransactionType
+}
 
+export type AuditActionType = "created" | "updated" | "reversed" | "deactivated"
+
+export interface AuditLogType {
+  id: string;
+  userId: string | null;
+  entityType: string;
+  entityId: string;
+  action: AuditActionType;
+  oldValues: Record<string, any> | null;
+  newValues: Record<string, any>;
+  ipAddress: string;
+  userAgent?: string | null;
+  createdAt: string | Date;
+}
+
+export type periodType = "weekly" | "monthly"
+
+export interface BudgetRuleType {
+  id: string;
+  userId: string;
+  categoryId: string;
+  period: periodType;
+  amountLimit: number;
+  alertThresholdPct: number;
+  isActive: boolean;
+  createAt: string | Date;
 }
