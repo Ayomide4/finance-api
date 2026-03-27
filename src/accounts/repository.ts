@@ -1,5 +1,5 @@
 import { pool } from "../db/index.js";
-import type { Account, AccountType, AccountWithBalance } from "../types.js";
+import type { Account, AccountType, AccountWithBalance, Transaction } from "../types.js";
 
 
 export async function saveAccount(userId: string, accountName: string, accountType: AccountType) {
@@ -39,4 +39,9 @@ export async function deleteAccountById(userId: string, accountId: string): Prom
   const res = await pool.query('UPDATE accounts SET account_status = $1 WHERE id = $2 AND user_id = $3 RETURNING *', [account_status, accountId, userId])
 
   return res.rows[0]
+}
+
+export async function listAccountTransactions(accountId: string, limit: number, offset: number,): Promise<Transaction[]> {
+  const res = await pool.query("SELECT * from transactions WHERE account_id = $1 LIMIT $2 OFFSET $3", [accountId, limit, offset])
+  return res.rows
 }

@@ -1,5 +1,5 @@
-import type { Account, AccountType, AccountWithBalance } from "../types.js";
-import { changeAccountName, deleteAccountById, getAccountById, listAccountsByUser, saveAccount } from "./repository.js";
+import type { Account, AccountType, AccountWithBalance, Transaction } from "../types.js";
+import { changeAccountName, deleteAccountById, getAccountById, listAccountsByUser, listAccountTransactions, saveAccount } from "./repository.js";
 
 
 export async function createAccount(userId: string, accountName: string, accountType: AccountType): Promise<AccountWithBalance> {
@@ -68,7 +68,24 @@ export async function getAccount(userId: string, accountId: string) {
   if (!res) {
     throw new Error("Account not found")
   }
+  return res
+}
+
+export async function getAccountTransations(accountId: string, limit: number, offset: number): Promise<Transaction[]> {
+  if (!accountId) throw new Error("Account id is required")
+
+  let res;
+
+  try {
+    res = await listAccountTransactions(accountId, limit, offset)
+  } catch (err) {
+    console.error("Database error while getting transactions from account")
+    throw new Error("Internal Serve Error")
+  }
+
+  if (!res.length) {
+    throw new Error("No transactions found")
+  }
 
   return res
-
 }

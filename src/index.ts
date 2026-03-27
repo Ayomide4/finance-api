@@ -6,7 +6,7 @@ import { users } from './users/route.js'
 import { authMiddleware } from './middleware/auth.js'
 import { except } from 'hono/combine'
 import type { Variables } from './types.js'
-import { accounts } from './accounts/routes.js'
+import { accounts } from './accounts/route.js'
 import { categories } from './categories/route.js'
 import { transactions } from './transactions/route.js'
 
