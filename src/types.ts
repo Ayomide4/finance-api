@@ -27,6 +27,8 @@ export type AccountStatus = "active" | "frozen" | "closed"
 
 export type CurrencyCode = "USD" | "EUR" | "GBP" | "CAD" | "JPY";
 
+export type AuditActionType = "created" | "updated" | "reversed" | "deactivated"
+
 export interface Account {
   id: string;
   user_id: string;
