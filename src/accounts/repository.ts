@@ -41,7 +41,4 @@ export async function deleteAccountById(userId: string, accountId: string): Prom
   return res.rows[0]
 }
 
-export async function listAccountTransactions(accountId: string, limit: number, offset: number,): Promise<Transaction[]> {
-  const res = await pool.query("SELECT * from transactions WHERE account_id = $1 LIMIT $2 OFFSET $3", [accountId, limit, offset])
-  return res.rows
-}
+

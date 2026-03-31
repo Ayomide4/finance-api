@@ -1,5 +1,5 @@
 import { pool } from "../db/index.js";
-import type { TransactionType } from "../types.js";
+import type { Transaction, TransactionType } from "../types.js";
 
 export async function saveTransaction(
   userId: string,
@@ -38,6 +38,11 @@ export async function saveTransaction(
   } finally {
     client.release()
   }
+}
+
+export async function listAccountTransactions(accountId: string, limit: number, offset: number,): Promise<Transaction[]> {
+  const res = await pool.query("SELECT * from transactions WHERE account_id = $1 LIMIT $2 OFFSET $3", [accountId, limit, offset])
+  return res.rows
 }
 
 

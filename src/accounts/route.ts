@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Variables } from "../types.js";
-import { createAccount, deleteAccount, getAccount, getAccountTransations, listAccountsWithBalance, updateAccountName } from "./service.js";
+import { createAccount, deleteAccount, getAccount, listAccountsWithBalance, updateAccountName } from "./service.js";
 import { transactions } from "../transactions/route.js";
 
 export const accounts = new Hono<{ Variables: Variables }>()
@@ -80,22 +80,8 @@ accounts.delete('/:id', async (c) => {
   }
 })
 
-accounts.get("/:id/transactions", async (c) => {
-  try {
-    const accountId = c.req.param('id')
-    const { limit, offset } = await c.req.json()
-    const res = getAccountTransations(accountId, limit, offset)
-    c.json(res, 200)
-  } catch (err) {
 
-    const errorMessage = err instanceof Error ? err.message : "Unknown error"
-
-    if (errorMessage === "No transactions found") {
-      c.json({ error: "No transactions found" }, 404)
-    }
-    c.json({ error: "Failed to get account transactions" }, 400)
-  }
-})
+accounts.route("/:id/transactions", transactions)
 
 //TODO: upate post path transactions?
 // accounts.route("/:accountId/transactions", transactions)

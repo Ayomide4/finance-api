@@ -31,7 +31,6 @@ v1.route('/api-keys', api_keys)
 v1.route('/users', users)
 v1.route('/accounts', accounts)
 v1.route("/categories", categories)
-v1.route('/transactions', transactions)
 v1.use('*', except(['/users']), authMiddleware)
 
 app.route('/v1', v1)

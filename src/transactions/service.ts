@@ -1,5 +1,5 @@
 import type { Transaction, TransactionType } from "../types.js";
-import { saveTransaction } from "./repository.js";
+import { listAccountTransactions, saveTransaction } from "./repository.js";
 
 export async function createTransaction(
   userId: string,
@@ -20,3 +20,26 @@ export async function createTransaction(
     throw new Error("Error creating transaction, try again")
   }
 }
+
+export async function getAccountTransations(accountId: string, limit: number, offset: number): Promise<Transaction[]> {
+  if (!accountId) throw new Error("Account id is required")
+
+  let res;
+
+  try {
+    res = await listAccountTransactions(accountId, limit, offset)
+  } catch (err) {
+    console.error("Database error while getting transactions from account")
+    throw new Error("Internal Serve Error")
+  }
+
+  if (!res.length) {
+    throw new Error("No transactions found")
+  }
+
+  return res
+}
+
+
+
+//reverse transaction
