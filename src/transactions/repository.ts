@@ -1,5 +1,6 @@
 import { pool } from "../db/index.js";
 import type { Transaction, TransactionType } from "../types.js";
+import { transactions } from "./route.js";
 
 export async function saveTransaction(
   userId: string,
@@ -45,8 +46,30 @@ export async function listAccountTransactions(accountId: string, limit: number, 
   return res.rows
 }
 
+export async function getTransactionById(accountId: string, transactionId: string): Promise<Transaction | undefined> {
+  const res = await pool.query("SELECT * FROM transactions WHERE account_id = $1 AND id = $2", [accountId, transactionId])
+  return res.rows[0]
+}
 
-// export async function reverseTransactionById(userId: string, transactionId: string) {
-//
-// }
+export async function reverseTransactionById(accountId: string, transactionId: string) {
+  const client = await pool.connect()
+  try {
+    await client.query("BEGIN")
+    await client.query("UPDATE transactions SET status = 'reversed', updated_at = NOW() WHERE account_id = $1 AND id = $2", [accountId, transactionId])
+
+    //add audit log
+    //adjust balance
+
+    await client.query("COMMIT")
+    return { success: true }
+  } catch (err) {
+    await client.query("ROLLBACK")
+    throw err
+  } finally {
+    client.release()
+  }
+
+}
+
+//TODO: audit log addition?
 

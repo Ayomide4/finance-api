@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createTransaction, getAccountTransations } from "./service.js"
-import { listAccountTransactions } from "./repository.js"
+import { createTransaction, getAccountTransations, getTransaction } from "./service.js"
+import { listAccountTransactions, getTransactionById } from "./repository.js"
 
 vi.mock('./repository.js', () => ({
   saveTransaction: vi.fn().mockResolvedValue({
@@ -25,7 +25,14 @@ vi.mock('./repository.js', () => ({
       amount: 0,
       type: "some-transaction-type"
     }
-  ])
+  ]),
+  getTransactionById: vi.fn().mockResolvedValue({
+    user_id: "some-user-id",
+    account_id: "some-account-id",
+    category_id: "some-category-id",
+    amount: 0,
+    type: "some-transaction-type"
+  })
 
 }))
 
@@ -85,7 +92,34 @@ describe("getAccountTransactions", () => {
       }
     ])
   })
-
-
 })
 
+describe("getTransaction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("should return single transaction obj", async () => {
+    const res = await getTransaction("some-account-id", "some-transaction-id")
+    expect(res).toEqual({
+      user_id: "some-user-id",
+      account_id: "some-account-id",
+      category_id: "some-category-id",
+      amount: 0,
+      type: "some-transaction-type"
+    })
+  })
+
+  it('should throw error if no account id', async () => {
+    await expect(getTransaction("", "some-transaction-id")).rejects.toThrow("Account id is required")
+  })
+
+  it('should throw error if no transaction id', async () => {
+    await expect(getTransaction("some-account-id", "")).rejects.toThrow("Transaction id is required")
+  })
+
+  it('should throw error if transaction not found', async () => {
+    vi.mocked(getTransactionById).mockResolvedValueOnce(undefined)
+    await expect(getTransaction("some-account-id", "some-transaction-id")).rejects.toThrow("No transaction found")
+  })
+})

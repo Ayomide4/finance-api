@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Variables } from "../types.js";
-import { createTransaction, getAccountTransations } from "./service.js";
+import { createTransaction, getAccountTransations, getTransaction } from "./service.js";
 
 export const transactions = new Hono<{ Variables: Variables }>()
 
@@ -19,12 +19,7 @@ transactions.post("/", async (c) => {
 
 transactions.get("/", async (c) => {
   try {
-    const accountId = c.req.param('id') //comes from account route 
-
-    if (!accountId) {
-      throw new Error("Account Id is required")
-    }
-
+    const accountId = c.req.param('id')! //comes from account route 
     const { limit, offset } = c.req.query()
     const limitNum = Math.min(Number(limit) || 20, 100)
     const offsetNum = Number(offset) || 0
@@ -42,3 +37,29 @@ transactions.get("/", async (c) => {
   }
 })
 
+//get single transaction by accountId
+transactions.get("/:txId", async (c) => {
+  try {
+    const accountId = c.req.param('id')! //comes from account route 
+    const transactionId = c.req.param("txId")!
+
+    const res = await getTransaction(accountId, transactionId)
+    return c.json(res, 200)
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error"
+
+    if (errorMessage === "No transaction found") {
+      return c.json({ errror: errorMessage }, 404)
+    }
+    return c.json({ error: "Failed to get transaction" }, 400)
+  }
+})
+
+//reverse transaction
+transactions.post("/txId/reverse", async (c) => {
+  try {
+
+  } catch (err) {
+
+  }
+})
