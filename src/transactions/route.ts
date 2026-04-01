@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Variables } from "../types.js";
-import { createTransaction, getAccountTransations, getTransaction, updateTransactionStatus } from "./service.js";
+import { createTransaction, getAccountTransations, getTransaction, reverseTransaction, updateTransactionStatus } from "./service.js";
 
 export const transactions = new Hono<{ Variables: Variables }>()
 
@@ -56,11 +56,21 @@ transactions.get("/:txId", async (c) => {
 })
 
 //reverse transaction
-transactions.post("/txId/reverse", async (c) => {
+transactions.post("/:txId/reverse", async (c) => {
   try {
+    const accountId = c.req.param('id')!
+    const transactionId = c.req.param("txId")!
+    const userId = c.get("userId")
+    const ip = c.req.header('x-forwarded-for') || '0.0.0.0'
+
+    const res = await reverseTransaction(accountId, transactionId, userId, ip)
+    return c.json(res, 200)
 
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error"
 
+    console.error("Failed to reverse transaction", err)
+    return c.json({ error: errorMessage }, 400)
   }
 })
 

@@ -1,4 +1,4 @@
-import type { Pool, PoolClient } from "pg";
+import type { PoolClient } from "pg";
 import { saveAuditLog } from "../audit_log/repository.js";
 import { pool } from "../db/index.js";
 import type { Transaction, TransactionType } from "../types.js";
@@ -20,7 +20,7 @@ export async function saveTransaction(
     await client.query("BEGIN")
 
     const queryText = `
-      INSERT INTO transactions (userId, accountId, categoryId, amount, type) 
+      INSERT INTO transactions (user_id, account_id, category_id, amount, type) 
       VALUES ($1, $2, $3, $4, $5) 
       RETURNING *
     `;
@@ -91,5 +91,4 @@ export async function setTransactionStatus(accountId: string, transactionId: str
   return res.rows[0]
 }
 
-//TODO: audit log addition?
 

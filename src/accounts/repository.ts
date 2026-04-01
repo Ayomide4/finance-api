@@ -1,5 +1,5 @@
 import { pool } from "../db/index.js";
-import type { Account, AccountType, AccountWithBalance, Transaction } from "../types.js";
+import type { Account, AccountType, AccountWithBalance } from "../types.js";
 
 
 export async function saveAccount(userId: string, accountName: string, accountType: AccountType) {
