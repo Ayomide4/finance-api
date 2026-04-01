@@ -59,14 +59,15 @@ export async function getTransaction(accountId: string, transactionId: string): 
   return res
 }
 
-export async function reverseTransaction(accountId: string, transactionId: string) {
+export async function reverseTransaction(accountId: string, transactionId: string, userId: string, ip: string) {
   if (!accountId) throw new Error("Account id is required")
   if (!transactionId) throw new Error("Transaction id is required")
+  if (!userId) throw new Error("User id is required")
 
   let res;
 
   try {
-    res = await reverseTransactionById(accountId, transactionId)
+    res = await reverseTransactionById(accountId, transactionId, userId, ip)
   } catch (err) {
     console.error("Database error while reversing transaction", err)
     throw new Error("Internal Server Error")

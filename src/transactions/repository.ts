@@ -1,3 +1,4 @@
+import { saveAuditLog } from "../audit_log/repository.js";
 import { pool } from "../db/index.js";
 import type { Transaction, TransactionType } from "../types.js";
 import { transactions } from "./route.js";
@@ -51,14 +52,20 @@ export async function getTransactionById(accountId: string, transactionId: strin
   return res.rows[0]
 }
 
-export async function reverseTransactionById(accountId: string, transactionId: string) {
+export async function reverseTransactionById(accountId: string, transactionId: string, userId: string, ip: string) {
   const client = await pool.connect()
   try {
     await client.query("BEGIN")
-    await client.query("UPDATE transactions SET status = 'reversed', updated_at = NOW() WHERE account_id = $1 AND id = $2", [accountId, transactionId])
 
-    //add audit log
-    //adjust balance
+    const oldTransaction = await client.query("SELECT * from transactions WHERE account_id = $1 AND id = $2", [accountId, transactionId])
+    const oldTxRes = oldTransaction.rows[0]
+
+    const transactionRes = await client.query("UPDATE transactions SET status = 'reversed', updated_at = NOW() WHERE account_id = $1 AND id = $2", [accountId, transactionId])
+
+    await saveAuditLog(userId, 'transactions', transactionId, "reversed", { status: oldTxRes.status }, { status: "reversed" }, ip, client)
+
+
+    //adjust balance isn't created yet
 
     await client.query("COMMIT")
     return { success: true }

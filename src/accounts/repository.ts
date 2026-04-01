@@ -9,9 +9,16 @@ export async function saveAccount(userId: string, accountName: string, accountTy
   return { ...account, balance: 0 } as AccountWithBalance
 }
 
+export async function getAccountBalance(accountId: string) {
+  const query = "SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE - amount END) as balance FROM transactions WHERE account_id = $1 AND status = 'posted'"
+  const res = await pool.query(query, [accountId])
+  return res.rows[0]
+}
+
 //TODO: update to include actual balance calculated from transactions
 export async function getAccountById(userId: string, accountId: string) {
   const res = await pool.query("SELECT * FROM accounts WHERE user_id = $1 AND id = $2", [userId, accountId])
+  //TODO: add getAccountBalance
   return { ...res.rows[0], balance: 0 }
 }
 

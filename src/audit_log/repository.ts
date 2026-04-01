@@ -3,7 +3,7 @@ import { pool } from "../db/index.js";
 import type { AuditActionType } from "../types.js";
 
 export async function saveAuditLog(
-  userId: string,
+  userId: string | null,
   entityType: string,
   entityId: string,
   action: AuditActionType,
