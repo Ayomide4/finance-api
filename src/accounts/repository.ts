@@ -10,31 +10,38 @@ export async function saveAccount(userId: string, accountName: string, accountTy
 }
 
 export async function getAccountBalance(accountId: string) {
-  const query = "SELECT SUM(CASE WHEN type = 'credit' THEN amount ELSE - amount END) as balance FROM transactions WHERE account_id = $1 AND status = 'posted'"
-  const res = await pool.query(query, [accountId])
-  return res.rows[0]
+  const query = `
+    SELECT 
+      COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE -amount END), 0)::FLOAT as balance 
+    FROM transactions 
+    WHERE account_id = $1 AND status = 'posted'
+  `;
+
+  const res = await pool.query(query, [accountId]);
+  return res.rows[0].balance
 }
 
-//TODO: update to include actual balance calculated from transactions
 export async function getAccountById(userId: string, accountId: string) {
   const res = await pool.query("SELECT * FROM accounts WHERE user_id = $1 AND id = $2", [userId, accountId])
-  //TODO: add getAccountBalance
-  return { ...res.rows[0], balance: 0 }
+  const balance = await getAccountBalance(accountId)
+  return { ...res.rows[0], balance: balance }
 }
 
-//TODO: update to include actual balance calculated from transactions
 export async function listAccountsByUser(userId: string, limit: number, offset: number) {
-  const result = await pool.query("SELECT * FROM accounts WHERE user_id = $1 LIMIT $2 OFFSET $3", [userId, limit, offset])
-  const accounts = result.rows
+  const query = `
+    SELECT 
+      a.*, 
+      COALESCE(SUM(CASE WHEN t.status = 'posted' THEN (CASE WHEN t.type = 'credit' THEN t.amount ELSE -t.amount END) ELSE 0 END), 0)::FLOAT as balance
+    FROM accounts a
+    LEFT JOIN transactions t ON a.id = t.account_id
+    WHERE a.user_id = $1
+    GROUP BY a.id
+    LIMIT $2 OFFSET $3
+  `;
 
-  const accountsWithBalance = accounts.map((account: Account) => ({
-    ...account,
-    balance: 0
-  }))
-
-  return accountsWithBalance
+  const result = await pool.query(query, [userId, limit, offset]);
+  return result.rows;
 }
-
 
 export async function changeAccountName(userId: string, accountName: string, accountId: string) {
   const result = await pool.query("UPDATE accounts SET account_name = $1 WHERE id = $2 AND user_id = $3 RETURNING *", [accountName, accountId, userId])

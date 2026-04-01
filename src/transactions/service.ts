@@ -1,5 +1,7 @@
+import { saveAuditLog } from "../audit_log/repository.js";
+import { pool } from "../db/index.js";
 import type { Transaction, TransactionType } from "../types.js";
-import { getTransactionById, listAccountTransactions, reverseTransactionById, saveTransaction } from "./repository.js";
+import { getTransactionById, listAccountTransactions, reverseTransactionById, saveTransaction, setTransactionStatus } from "./repository.js";
 
 export async function createTransaction(
   userId: string,
@@ -77,4 +79,44 @@ export async function reverseTransaction(accountId: string, transactionId: strin
     throw new Error("Failed to reverse transaction")
   }
   return res
+}
+
+export async function updateTransactionStatus(
+  accountId: string,
+  transactionId: string,
+  userId: string,
+  ip: string
+) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const updatedTx = await setTransactionStatus(accountId, transactionId, client);
+
+    if (!updatedTx) {
+      throw new Error("Transaction not found or ineligible for posting");
+    }
+
+    await saveAuditLog(
+      userId,
+      'transactions',
+      transactionId,
+      'updated',
+      { status: 'pending' },
+      { status: 'posted' },
+      ip,
+      client
+    );
+
+    await client.query("COMMIT");
+    return { success: true, data: updatedTx };
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Error in updateTransactionStatus:", err);
+    throw err;
+  } finally {
+    client.release();
+  }
 }

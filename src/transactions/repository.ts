@@ -1,3 +1,4 @@
+import type { Pool, PoolClient } from "pg";
 import { saveAuditLog } from "../audit_log/repository.js";
 import { pool } from "../db/index.js";
 import type { Transaction, TransactionType } from "../types.js";
@@ -75,7 +76,19 @@ export async function reverseTransactionById(accountId: string, transactionId: s
   } finally {
     client.release()
   }
+}
 
+export async function setTransactionStatus(accountId: string, transactionId: string, client?: PoolClient) {
+  const db = client || pool
+
+  const query = `UPDATE transactions SET status = 'posted', updated_at = NOW() WHERE account_id = $1 AND id = $2 AND status = 'pending'`
+
+  const res = await db.query(query, [accountId, transactionId])
+  if (res.rowCount === 0) {
+    return null // if id is wrong or already posted
+  }
+
+  return res.rows[0]
 }
 
 //TODO: audit log addition?
